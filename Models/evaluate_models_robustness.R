@@ -29,7 +29,7 @@ perturb_testing_x <- function(disease_name) {
         levels = custom_levels)
     ) |>
     mutate(
-      dumpsite = ifelse(dumpsite == TRUE, FALSE, FALSE)
+      dumpsite = FALSE
     )
 }
 
@@ -40,24 +40,23 @@ predict_perturbed <- function(disease_name) {
     predict(testing_x)
 }
 
-rge <- function(full_prediciton, perturbed_prediction, observed) {
+rgr <- function(full_prediciton, perturbed_prediction) {
   rg(full_prediciton, perturbed_prediction) 
 }
 
-evaluate_robustness <- function(disease_name, statistic) {
+evaluate_robustness <- function(disease_name, statistic, ...) {
   full_prediction <- predict_model(disease_name)
   
   perturbed_prediction <- predict_perturbed(disease_name)
   
   observed <- get_testing_y(disease_name)
   
-  statistic(full_prediction, perturbed_prediction, observed)
+  statistic(full_prediction, perturbed_prediction, ...)
 }
 
 tibble(
   model_names = disease_names,
-  percent_inc_mse =
-    map_dbl(disease_names, \(x) evaluate_robustness(x, percent_inc_mse)),
-  rge = map_dbl(disease_names, \(x) evaluate_robustness(x, rge))
+  rmse = map_dbl(disease_names, \(x) evaluate_robustness(x, rmse)),
+  rgr = map_dbl(disease_names, \(x) evaluate_robustness(x, rgr))
 ) |> 
   write_csv(file = "Results/model_robustness.csv")

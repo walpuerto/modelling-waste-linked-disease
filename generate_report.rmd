@@ -16,7 +16,9 @@ knitr::opts_chunk$set(
 
 This document presents the model accuracy, explainability and robustness of several random forest models. These models predict the incidence of different waste-linked diseases, which were validated using several statistics, such as RMSE, %IncMSE, RGA, RGE, and RGR.
 
-For more information, see the [Github Repository](https://github.com/walpuerto/waste-linked-disease-modelling).
+To learn more about the evaluation, see the [Github Repository](https://github.com/walpuerto/waste-linked-disease-modelling).
+
+To learn more about Rank Graduation (RG) Box metrics, see [this article](https://doi.org/10.1016/j.eswa.2024.125239).
 
 ## Model Accuracy
 
@@ -38,7 +40,7 @@ model_accuracies |>
   labs(
     x = "Disease Model",
     y = "RMSE",
-    title = "RMSE of Disease Models")
+    title = "RMSE of disease models")
 ```
 
 RMSE gives a general idea of how "distant" the predicted values are from the observed values. It is in the same units as the predicted variable, which in this case is incidence of disease or number of cases. For instance, on average, dengue predictions differ by about `r round(model_accuracies$rmse[1], 2)` cases from the observed values. 
@@ -58,9 +60,54 @@ RGA measures the "concordance" of the predicted values vector to the observed va
 
 For instance, dengue is likely uncorrelated to waste management practices because it has an RGA score of `r round(model_accuracies$rga[1], 2)`.
 
+## Model Robustness (Stability)
+
+A perturbed version of the testing set, which simulates under-reporting and misreporting, was given to each model.
+
+The numeric predictors: `total_waste`, `biodegradable`, `residual`, `recyclable` and `special` were multiplied by `0.85`.
+
+The `"SOME AREAS"` factor in the `collection_segregation` predictor was converted to `"ALL AREAS"`.
+
+All values in the `dumpsite` predictor was converted to `FALSE`. 
+
+```{r robustness_rmse}
+model_robustness <- read_csv("Results/model_robustness.csv") |> 
+  rename(model_name = model_names) |> 
+  mutate(
+    model_name = gsub("_", " ", model_name) |> 
+      str_to_title()
+  )
+
+model_robustness |> 
+  ggplot(aes(x = model_name, y = rmse)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    x = "Disease Model",
+    y = "RMSE",
+    title = "RMSE between full and perturbed predictions")
+```
+
+RMSE measures the average distance of the predictions made with perturbed data to the predictions made with complete data. It is in the units of number of cases. A high RMSE score indicates poor robustness against perturbations in the data, while a low RMSE score indicates better robustness. 
+
+For instance, the dengue model is likely unstable because the perturbed predictions differ by about `r round(model_robustness$rmse[1], 2)` cases to the full predictions.
+
+```{r robustness_rgr}
+model_robustness |> 
+  ggplot(aes(x = model_name, y = rgr)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    x = "Disease Model",
+    y = "RGR",
+    title = "RGR of disease models")
+```
+
+RGR measures the concordance between the prediction vector made with perturbed data and the prediction vector made with full data. A value of 1 indicates that the perturbed predictions match exactly to the full predictions. A value of 0 indicates that the perturbed predictions mismatch completely to the full predictions. A value of 0.5 indicates no correlation. And, other values signify a mixed interpretation.
+
 ## Model Explainability
 
-Model explainability measures the contribution of each predictor in the model. Reduced versions of each random forest model were made, wherein a specific predictor was removed during the training process. The reduced models' predictions were compared against the full model's using Percent Increase in Mean-Square Error (%IncMSE) and Rank Graduation Explainability (RGE). 
+Reduced versions of each random forest model were made, wherein a specific predictor was removed during the training process. The reduced models' predictions were compared against the full model's using Percent Increase in Mean-Square Error (%IncMSE) and Rank Graduation Explainability (RGE). 
 
 ```{r explainability_percent_inc_mse}
 library(shiny)
@@ -148,8 +195,6 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-RGE measures the concordance between the reduced model's prediction vector and the full model's prediction vector. An RGE score of 1 indicates that the full model's predictions match exactly with the reduced model's predictions. An RGE score of 0 indicates that the predictions are mismatched completely. An RGE score 0.5 indicates no correlation. And, other scores indicate a mix in between.
+RGE measures the concordance between the reduced model's prediction vector and the full model's prediction vector. An RGE score of 1 indicates that the full predictions match exactly with the reduced predictions. An RGE score of 0 indicates that the predictions are mismatched completely. An RGE score 0.5 indicates no correlation. And, other scores indicate a mix in between.
 
-An RGE score between 0 and 0.5 may mean that the predictor has an inverse effect to the number of cases. An advantage of RGE is its ability to study the prediction vectors as a whole, rather than comparing individual elements.
-
-## Model Robustness
+An RGE score between 0 and 0.5 may mean that the predictor has an inverse effect to the number of cases. An advantage of RGE is its ability to study the prediction vectors as a whole, rather than only comparing individual elements.
