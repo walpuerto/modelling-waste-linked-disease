@@ -1,0 +1,12 @@
+name: random_forest_models_of_waste-linked_diseases_evaluation
+title: Random Forest Models of Waste-Linked Diseases: Evaluation
+username: walpuerto
+account: walpuerto
+server: connect.posit.cloud
+hostUrl: https://api.connect.posit.cloud/v1
+appId: 01a18744-5f4c-b094-4e53-e7bf46831576
+bundleId:
+url: https://connect.posit.cloud/walpuerto/content/01a18744-5f4c-b094-4e53-e7bf46831576
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

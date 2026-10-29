@@ -1,7 +1,7 @@
 ---
 title: "Random Forest Models of Waste-Linked Diseases: Evaluation"
 author: "Winsor Alpuerto, Krissa Franco & Julie Ann Lumantao"
-date: "2026-10-28"
+date: "2026-10-29"
 output: html_document
 runtime: shiny
 ---
@@ -52,7 +52,7 @@ model_accuracies |>
   labs(
     x = "RGA",
     y = "Disease Model",
-    title = "RGA of Disease Models") + 
+    title = "RGA of disease models") + 
   scale_x_continuous(limits = c(0, 1))
 ```
 
@@ -72,7 +72,6 @@ All values in the `dumpsite` predictor was converted to `FALSE`.
 
 ```{r robustness_rmse}
 model_robustness <- read_csv("Results/model_robustness.csv") |> 
-  rename(model_name = model_names) |> 
   mutate(
     model_name = gsub("_", " ", model_name) |> 
       str_to_title()
@@ -112,46 +111,39 @@ Reduced versions of each random forest model were made, wherein a specific predi
 ```{r explainability_percent_inc_mse}
 library(shiny)
 
-model_names <- model_accuracies |> 
-  pull("model_name")
+model_explainabilities <- read_rds("Results/model_explainabilities.rds")
+
+names(model_explainabilities) <- model_explainabilities |> 
+  names() |> 
+  map_chr(\(x) str_to_title(gsub("_", " ", x)))
 
 ui <- fluidPage(
   selectInput(
     inputId = "disease_name",
     label = "Select model",
-    choices = model_names,
-    selected = model_names[1]
+    choices = names(model_explainabilities)
   ),
   hr(),
   plotOutput("plot")
 )
 
-load_disease_explainability <- function(unformatted_disease_name) {
-  disease_name <- unformatted_disease_name |> 
-    gsub(" ", "_", x =_) |>
-    str_to_lower()
-  
-  paste0("Results/", disease_name, "_model_explainability.csv") |> 
-    read_csv() |> 
-    rename(
-      predictor_name = predictor_names
-      ) |> 
-      mutate(
-        predictor_name = gsub("_", " ", predictor_name) |> 
-      str_to_title()
-      )
-}
-
 server <- function(input, output, session) {
   output$plot <- renderPlot(
     {
-      load_disease_explainability(input$disease_name) |> 
+      model_explainabilities[[input$disease_name]] |> 
+        mutate(
+          predictor_name = str_to_title(gsub("_", " ", predictor_name))
+        ) |> 
         ggplot(aes(x = percent_inc_mse, y = predictor_name)) +
         geom_col() +
         labs(
           x = "% Increase in MSE",
           y = "Predictor",
-          title = "% Increase in MSE of each predictor"
+          title = paste0(
+            "% Increase in MSE of each predictor in the ",
+            input$disease_name,
+            " model"
+            )
         )
     }
   )
@@ -169,8 +161,7 @@ ui <- fluidPage(
   selectInput(
     inputId = "disease_name",
     label = "Select model",
-    choices = model_names,
-    selected = model_names[1]
+    choices = names(model_explainabilities)
   ),
   hr(),
   plotOutput("plot")
@@ -179,13 +170,20 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   output$plot <- renderPlot(
     {
-      load_disease_explainability(input$disease_name) |> 
+      model_explainabilities[[input$disease_name]] |> 
+        mutate(
+          predictor_name = str_to_title(gsub("_", " ", predictor_name))
+        ) |> 
         ggplot(aes(x = rge, y = predictor_name)) +
         geom_col() +
         labs(
           x = "RGE",
           y = "Predictor",
-          title = "RGE of each predictor"
+          title = paste0(
+            "% Increase in MSE of each predictor in the ",
+            input$disease_name,
+            " model"
+            )
         ) +
         scale_x_continuous(limits = c(0, 1))
     }

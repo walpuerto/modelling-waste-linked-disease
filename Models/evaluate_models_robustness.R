@@ -55,7 +55,7 @@ evaluate_robustness <- function(disease_name, statistic, ...) {
 }
 
 tibble(
-  model_names = disease_names,
+  model_name = disease_names,
   rmse = map_dbl(disease_names, \(x) evaluate_robustness(x, rmse)),
   rgr = map_dbl(disease_names, \(x) evaluate_robustness(x, rgr))
 ) |> 

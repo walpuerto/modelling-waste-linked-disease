@@ -39,18 +39,16 @@ evaluate_explainability <- function(disease_name, statistic) {
 
 generate_explainability_tibble <- function(disease_name) {
   tibble(
-    predictor_names = names(select(predictors, -name_of_place)),
+    predictor_name = names(select(predictors, -name_of_place)),
     percent_inc_mse = evaluate_explainability(disease_name, percent_inc_mse),
     rge = evaluate_explainability(disease_name, rge)
   )
 }
 
-generate_explainability_tibble_and_save <- function(disease_name) {
-  generate_explainability_tibble(disease_name) |> 
-    write_csv(
-      file = paste0("Results/", disease_name, "_model_explainability.csv")
-    )
-}
+model_explainabilities <- disease_names |> 
+  map(generate_explainability_tibble)
 
-disease_names |> 
-  map(generate_explainability_tibble_and_save)
+names(model_explainabilities) <- disease_names
+  
+model_explainabilities |> 
+  write_rds(file = "results/model_explainabilities.rds")
