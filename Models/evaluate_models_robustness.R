@@ -12,7 +12,7 @@ convert_some_to_all <- function(factor) {
 
 perturb_testing_x <- function(disease_name) {
   custom_levels <- get_testing_x(disease_name) |>
-    pull("collection_segregation") |>
+    pull("reported_collection_segregation") |>
     levels()
 
   get_testing_x(disease_name) |> 
@@ -24,8 +24,8 @@ perturb_testing_x <- function(disease_name) {
       special = 0.85 * special
     ) |>
     mutate(
-      collection_segregation = factor(
-        convert_some_to_all(collection_segregation),
+      reported_collection_segregation = factor(
+        convert_some_to_all(reported_collection_segregation),
         levels = custom_levels)
     ) |>
     mutate(

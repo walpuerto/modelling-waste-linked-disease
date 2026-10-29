@@ -4,7 +4,10 @@ library(janitor)
 
 read_excel("Raw Data/DATA.xlsx", sheet = "Waste") |>
   clean_names() |> 
-  mutate(collection_segregation = as_factor(collection_segregation)) |> 
+  mutate(
+    reported_collection_segregation = reported_collection_segregation |> 
+      as_factor()
+    ) |> 
   saveRDS(file = "Data/predictors.rds")
 
 read_excel("Raw Data/DATA.xlsx", sheet = "Disease") |> 

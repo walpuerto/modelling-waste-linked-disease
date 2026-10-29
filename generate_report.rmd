@@ -34,9 +34,8 @@ model_accuracies <- read_csv("Results/model_accuracies.csv") |>
   )
 
 model_accuracies |> 
-  ggplot(aes(x = model_name, y = rmse)) +
+  ggplot(aes(x = rmse, y = model_name)) +
   geom_col() +
-  coord_flip() +
   labs(
     x = "Disease Model",
     y = "RMSE",
@@ -58,7 +57,7 @@ model_accuracies |>
 
 RGA measures the "concordance" of the predicted values vector to the observed values vector. A value of 1 indicates that the predictions match exactly to the observations. A value of 0 indicates that the predictions mismatch completely to the observations. A value of 0.5 indicates no correlation among the vectors. And, other values can signify a mixed interpretation.
 
-For instance, dengue is likely uncorrelated to waste management practices because it has an RGA score of `r round(model_accuracies$rga[1], 2)`.
+For instance, the predictions of the gastroenteritis model are likely uncorrelated to the actual observations because it has an RGA score of `r round(model_accuracies$rga[2], 2)`.
 
 ## Model Robustness (Stability)
 
@@ -89,17 +88,18 @@ model_robustness |>
 
 RMSE measures the average distance of the predictions made with perturbed data to the predictions made with complete data. It is in the units of number of cases. A high RMSE score indicates poor robustness against perturbations in the data, while a low RMSE score indicates better robustness. 
 
-For instance, the dengue model is likely unstable because the perturbed predictions differ by about `r round(model_robustness$rmse[1], 2)` cases to the full predictions.
+For instance, the bronchial asthma model is likely unstable because the perturbed predictions differ by about `r round(model_robustness$rmse[1], 2)` cases to the full predictions.
 
 ```{r robustness_rgr}
 model_robustness |> 
-  ggplot(aes(x = model_name, y = rgr)) +
+  ggplot(aes(x = rgr, y = model_name)) +
   geom_col() +
-  coord_flip() +
   labs(
     x = "Disease Model",
     y = "RGR",
-    title = "RGR of disease models")
+    title = "RGR of disease models"
+    ) + 
+  scale_x_continuous(limits = c(0, 1))
 ```
 
 RGR measures the concordance between the prediction vector made with perturbed data and the prediction vector made with full data. A value of 1 indicates that the perturbed predictions match exactly to the full predictions. A value of 0 indicates that the perturbed predictions mismatch completely to the full predictions. A value of 0.5 indicates no correlation. And, other values signify a mixed interpretation.
