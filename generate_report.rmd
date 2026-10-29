@@ -3,6 +3,7 @@ title: "Random Forest Models of Waste-Linked Diseases: Evaluation"
 author: "Winsor Alpuerto, Krissa Franco & Julie Ann Lumantao"
 date: "2026-10-28"
 output: html_document
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -19,7 +20,7 @@ For more information, see the [Github Repository](https://github.com/walpuerto/w
 
 ## Model Accuracy
 
-Model accuracy was obtained using an untouched testing set. Each model had its own randomly sampled testing set from the raw data, and its predictive accuracy was evaluated using root mean square error (RMSE) and rank graduation accuracy (RGA).
+Model accuracy was obtained using untouched testing sets. Each model had its own randomly sampled testing set from the raw data, and its predictive accuracy was evaluated using root mean square error (RMSE) and rank graduation accuracy (RGA).
 
 ```{r accuracy_rmse, echo=FALSE}
 library(tidyverse)
@@ -43,7 +44,6 @@ model_accuracies |>
 RMSE gives a general idea of how "distant" the predicted values are from the observed values. It is in the same units as the predicted variable, which in this case is incidence of disease or number of cases. For instance, on average, dengue predictions differ by about `r round(model_accuracies$rmse[1], 2)` cases from the observed values. 
 
 ```{r accuracy_rge}
-
 model_accuracies |> 
   ggplot(aes(x = rga, y = model_name)) +
   geom_col() + 
@@ -57,3 +57,99 @@ model_accuracies |>
 RGA measures the "concordance" of the predicted values vector to the observed values vector. A value of 1 indicates that the predictions match exactly to the observations. A value of 0 indicates that the predictions mismatch completely to the observations. A value of 0.5 indicates no correlation among the vectors. And, other values can signify a mixed interpretation.
 
 For instance, dengue is likely uncorrelated to waste management practices because it has an RGA score of `r round(model_accuracies$rga[1], 2)`.
+
+## Model Explainability
+
+Model explainability measures the contribution of each predictor in the model. Reduced versions of each random forest model were made, wherein a specific predictor was removed during the training process. The reduced models' predictions were compared against the full model's using Percent Increase in Mean-Square Error (%IncMSE) and Rank Graduation Explainability (RGE). 
+
+```{r explainability_percent_inc_mse}
+library(shiny)
+
+model_names <- model_accuracies |> 
+  pull("model_name")
+
+ui <- fluidPage(
+  selectInput(
+    inputId = "disease_name",
+    label = "Select model",
+    choices = model_names,
+    selected = model_names[1]
+  ),
+  hr(),
+  plotOutput("plot")
+)
+
+load_disease_explainability <- function(unformatted_disease_name) {
+  disease_name <- unformatted_disease_name |> 
+    gsub(" ", "_", x =_) |>
+    str_to_lower()
+  
+  paste0("Results/", disease_name, "_model_explainability.csv") |> 
+    read_csv() |> 
+    rename(
+      predictor_name = predictor_names
+      ) |> 
+      mutate(
+        predictor_name = gsub("_", " ", predictor_name) |> 
+      str_to_title()
+      )
+}
+
+server <- function(input, output, session) {
+  output$plot <- renderPlot(
+    {
+      load_disease_explainability(input$disease_name) |> 
+        ggplot(aes(x = percent_inc_mse, y = predictor_name)) +
+        geom_col() +
+        labs(
+          x = "% Increase in MSE",
+          y = "Predictor",
+          title = "% Increase in MSE of each predictor"
+        )
+    }
+  )
+}
+
+shinyApp(ui, server)
+```
+
+%IncMSE measures the accuracy contribution of a predictor in a model. A positive %IncMSE statistic indicates that the reduced model's predictions deviate more from the observed values than the full model's predictions. Meanwhile, a negative %IncMSE statistic indicates that the reduced model's predictions match more to the observed values than the full model's predictions. A 0 score indicates that the reduced model and full model have the same predictive accuracy.
+
+It is important to note that %IncMSE does not measure causality, but the accuracy contribution of a predictor in the model.
+
+```{r explainability_rge}
+ui <- fluidPage(
+  selectInput(
+    inputId = "disease_name",
+    label = "Select model",
+    choices = model_names,
+    selected = model_names[1]
+  ),
+  hr(),
+  plotOutput("plot")
+)
+
+server <- function(input, output, session) {
+  output$plot <- renderPlot(
+    {
+      load_disease_explainability(input$disease_name) |> 
+        ggplot(aes(x = rge, y = predictor_name)) +
+        geom_col() +
+        labs(
+          x = "RGE",
+          y = "Predictor",
+          title = "RGE of each predictor"
+        ) +
+        scale_x_continuous(limits = c(0, 1))
+    }
+  )
+}
+
+shinyApp(ui, server)
+```
+
+RGE measures the concordance between the reduced model's prediction vector and the full model's prediction vector. An RGE score of 1 indicates that the full model's predictions match exactly with the reduced model's predictions. An RGE score of 0 indicates that the predictions are mismatched completely. An RGE score 0.5 indicates no correlation. And, other scores indicate a mix in between.
+
+An RGE score between 0 and 0.5 may mean that the predictor has an inverse effect to the number of cases. An advantage of RGE is its ability to study the prediction vectors as a whole, rather than comparing individual elements.
+
+## Model Robustness
