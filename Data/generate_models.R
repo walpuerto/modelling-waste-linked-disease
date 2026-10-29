@@ -61,14 +61,13 @@ testing_indexes <- training_indexes |>
   as_tibble()
 
 generate_testing_set <- function(disease_name) {
-  x <- predictors |>
-    slice(testing_indexes[[disease_name]])
+  x <- predictors
   
   y <- observations |> 
     select(name_of_place, any_of(disease_name)) |> 
-    slice(testing_indexes[[disease_name]])
   
-  left_join(x, y, by = join_by(name_of_place))
+  left_join(x, y, by = join_by(name_of_place)) |> 
+    slice(testing_indexes[[disease_name]])
 } 
 
 save_testing_set <- function(testing_set, disease_name) {
