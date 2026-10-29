@@ -10,3 +10,10 @@ Please run the R scripts in this order.
 4. Run "Models/evaluate_models.R"
 5. Run "Models/evaluate_models_explainability.R"
 6. Run "Models/evaluate_models_robustness.R"
+
+# View Report
+You may view the generated report with the link below.
+
+https://walpuerto-random-forest-models-of-waste-linked-diseases.share.connect.posit.cloud/
+
+Thank you very much for viewing and reviewing this repository! :))
