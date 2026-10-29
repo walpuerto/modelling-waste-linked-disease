@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 This document presents the model accuracy, explainability and robustness of several random forest models. These models predict the incidence of different waste-linked diseases, which were validated using several statistics, such as RMSE, %IncMSE, RGA, RGE, and RGR.
 
-To learn more about the evaluation, see the [Github Repository](https://github.com/walpuerto/waste-linked-disease-modelling).
+To learn more about the evaluation, see the [Github Repository](https://github.com/walpuerto/modelling-waste-linked-disease).
 
 To learn more about Rank Graduation (RG) Box metrics, see [this article](https://doi.org/10.1016/j.eswa.2024.125239).
 
