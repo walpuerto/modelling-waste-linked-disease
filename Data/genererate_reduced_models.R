@@ -31,14 +31,10 @@ generate_all_reduced_models <- function(disease_name) {
 }
 
 generate_and_save_all_reduced_models <- function(disease_name) {
-  file_name <- paste0(
-    "Models/Reduced Models/",
-    disease_name,
-    "_reduced_models.rds")
-  
-  disease_name |>
-    generate_all_reduced_models() |> 
-    saveRDS(file = file_name)
+  generate_all_reduced_models(disease_name) |> 
+    saveRDS(file = paste0(
+      "Models/Reduced Models/", disease_name, "_reduced_models.rds"
+      ))
 }
 
 generate_and_save_all_reduced_models("dengue")
