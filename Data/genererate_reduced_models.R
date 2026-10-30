@@ -30,7 +30,7 @@ generate_all_reduced_models <- function(disease_name) {
   reduced_models
 }
 
-generate_all_reduced_models_and_save <- function(disease_name) {
+generate_and_save_all_reduced_models <- function(disease_name) {
   file_name <- paste0(
     "Models/Reduced Models/",
     disease_name,
@@ -41,14 +41,14 @@ generate_all_reduced_models_and_save <- function(disease_name) {
     saveRDS(file = file_name)
 }
 
-generate_all_reduced_models_and_save("dengue")
+generate_and_save_all_reduced_models("dengue")
 
-generate_all_reduced_models_and_save("gastroenteritis")
+generate_and_save_all_reduced_models("gastroenteritis")
 
-generate_all_reduced_models_and_save("bronchial_asthma")
+generate_and_save_all_reduced_models("bronchial_asthma")
 
-generate_all_reduced_models_and_save("dermatitis")
+generate_and_save_all_reduced_models("dermatitis")
 
-generate_all_reduced_models_and_save("chronic_obstructive_pulmonary_disease")
+generate_and_save_all_reduced_models("chronic_obstructive_pulmonary_disease")
 
-generate_all_reduced_models_and_save("pulmonary_hypertension")
+generate_and_save_all_reduced_models("pulmonary_hypertension")
