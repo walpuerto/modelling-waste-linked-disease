@@ -67,16 +67,16 @@ rg <- function(vector_a, vector_b, plot = FALSE) {
     sum(double_lorenz_x - lorenz_x)
 }
 
-rga <- function(observed, predicted) {
-  rg(observed, predicted)
+rga <- function(observed, predicted, plot = FALSE) {
+  rg(observed, predicted, plot)
 }
 
-evaluate_model_accuracy <- function(disease_name, statistic) {
+evaluate_model_accuracy <- function(disease_name, statistic, ...) {
   y_hat <- predict_model(disease_name)
   
   y <- get_testing_y(disease_name)
   
-  statistic(y, y_hat)
+  statistic(y, y_hat, ...)
 }
 
 disease_names <- c(
