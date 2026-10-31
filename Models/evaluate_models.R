@@ -67,7 +67,11 @@ rg <- function(vector_a, vector_b, plot = FALSE) {
     sum(double_lorenz_x - lorenz_x)
 }
 
+<<<<<<< HEAD
 rga <- function(observed, predicted, plot = FALSE) {
+=======
+rga <- function(observed, predicted, plot) {
+>>>>>>> 35baf826fdf8cc2a7a25244d9095f41581c2f6b1
   rg(observed, predicted, plot)
 }
 
@@ -91,6 +95,6 @@ disease_names <- c(
 tibble(
   model_name = disease_names,
   rmse = map_dbl(disease_names, \(x) evaluate_model_accuracy(x, rmse)),
-  rga = map_dbl(disease_names, \(x) evaluate_model_accuracy(x, rga))
+  rga = map_dbl(disease_names, \(x) evaluate_model_accuracy(x, rga, TRUE))
   ) |> 
   write_csv(file = "Results/model_accuracies.csv")
