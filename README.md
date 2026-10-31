@@ -1,6 +1,6 @@
 # Random Forest Models of Waste-Linked Diseases: Evaluation
 
-This repository contains the files used to evaluate several random forest models, and is mean to accompany the study _Forecasting Waste-Linked Health Risks with Random Forest_.
+This repository contains the files used to evaluate several random forest models, and is meant to accompany the study _Forecasting Waste-Linked Health Risks with Random Forest_.
 
 # Order of Evaluation
 Please run the R scripts in this order.
