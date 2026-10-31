@@ -17,10 +17,8 @@ get_testing_y <- function(disease_name) {
 }
 
 predict_model <- function(disease_name) {
-  testing_x <- get_testing_x(disease_name)
-  
   read_model(disease_name) |> 
-    predict(testing_x)
+    predict(get_testing_x(disease_name))
 }
 
 mse <- function(observed, predicted) {
