@@ -2,10 +2,9 @@ predict_reduced_model <- function(variable_name, disease_name) {
   testing_x <- get_testing_x(disease_name) |> 
     select(-any_of(variable_name))
   
-  readRDS(
-    paste0("Models/Reduced Models/", disease_name, "_reduced_models.rds")
-  ) |>
-    _[[variable_name]] |> 
+  paste0("Models/Reduced Models/", disease_name, "_reduced_models.rds") |>
+    readRDS() |>
+    pull(variable_name) |> 
     predict(testing_x)
 }
 
