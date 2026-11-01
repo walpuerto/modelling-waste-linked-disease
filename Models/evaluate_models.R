@@ -91,6 +91,6 @@ disease_names <- c(
 tibble(
   model_name = disease_names,
   rmse = map_dbl(disease_names, \(x) evaluate_model_accuracy(x, rmse)),
-  rga = map_dbl(disease_names, \(x) evaluate_model_accuracy(x, rga, TRUE))
+  rga = map_dbl(disease_names, \(x) evaluate_model_accuracy(x, rga))
   ) |> 
   write_csv(file = "Results/model_accuracies.csv")
