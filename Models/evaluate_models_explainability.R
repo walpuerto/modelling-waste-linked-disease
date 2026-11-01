@@ -4,8 +4,7 @@ predict_reduced_model <- function(variable_name, disease_name) {
   
   readRDS(
     paste0("Models/Reduced Models/", disease_name, "_reduced_models.rds")
-  ) |>
-    _[[variable_name]] |> 
+  ) |> pull(variable_name) |> 
     predict(testing_x)
 }
 
