@@ -31,9 +31,8 @@ rmse <- function(observed, predicted) {
     sqrt()
 }
 
-add_start_zero <- function(vector) {
-  vector |> 
-    append(0, after = 0)
+rmse_sd <- function(observed, predicted) {
+  rmse(observed, predicted) / sd(predicted)
 }
 
 rg <- function(vector_a, vector_b, plot = FALSE) {
@@ -57,6 +56,11 @@ rg <- function(vector_a, vector_b, plot = FALSE) {
     cumsum() / (n * mean(vector_a))
 
   if (plot == TRUE) {
+    add_start_zero <- function(vector) {
+      vector |> 
+        append(0, after = 0)
+    }
+    
     plot(y, y, type = "l", xlab = "p", ylab = "f(p)")
     lines(add_start_zero(lorenz_x), y, col = "green")
     lines(add_start_zero(double_lorenz_x), y, col = "orange")
@@ -91,6 +95,7 @@ disease_names <- c(
 tibble(
   model_name = disease_names,
   rmse = map_dbl(disease_names, \(x) evaluate_model_accuracy(x, rmse)),
+  rmse_sd = map_dbl(disease_names, \(x) evaluate_model_accuracy(x, rmse_sd)),
   rga = map_dbl(disease_names, \(x) evaluate_model_accuracy(x, rga))
   ) |> 
   write_csv(file = "Results/model_accuracies.csv")
