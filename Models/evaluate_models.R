@@ -35,6 +35,11 @@ rmse_sd <- function(observed, predicted) {
   rmse(observed, predicted) / sd(predicted)
 }
 
+add_start_zero <- function(vector) {
+  vector |> 
+    append(0, after = 0)
+}
+
 rg <- function(vector_a, vector_b, plot = FALSE) {
   if (length(vector_a) != length(vector_b)) {
     stop("Vector A and B have different lengths!")
@@ -56,11 +61,6 @@ rg <- function(vector_a, vector_b, plot = FALSE) {
     cumsum() / (n * mean(vector_a))
 
   if (plot == TRUE) {
-    add_start_zero <- function(vector) {
-      vector |> 
-        append(0, after = 0)
-    }
-    
     plot(y, y, type = "l", xlab = "p", ylab = "f(p)")
     lines(add_start_zero(lorenz_x), y, col = "green")
     lines(add_start_zero(double_lorenz_x), y, col = "orange")
