@@ -31,10 +31,6 @@ rmse <- function(observed, predicted) {
     sqrt()
 }
 
-rmse_sd <- function(observed, predicted) {
-  rmse(observed, predicted) / sd(predicted)
-}
-
 add_start_zero <- function(vector) {
   vector |> 
     append(0, after = 0)
@@ -95,7 +91,6 @@ disease_names <- c(
 tibble(
   model_name = disease_names,
   rmse = map_dbl(disease_names, \(x) evaluate_model_accuracy(x, rmse)),
-  rmse_sd = map_dbl(disease_names, \(x) evaluate_model_accuracy(x, rmse_sd)),
   rga = map_dbl(disease_names, \(x) evaluate_model_accuracy(x, rga))
   ) |> 
   write_csv(file = "Results/model_accuracies.csv")
