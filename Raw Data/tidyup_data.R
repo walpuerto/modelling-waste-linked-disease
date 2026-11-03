@@ -2,7 +2,7 @@ library(tidyverse)
 library(readxl)
 library(janitor)
 
-read_excel("Raw Data/DATA.xlsx", sheet = "Waste") |>
+read_excel("Raw Data/DATA-verified.xlsx", sheet = "Waste") |>
   clean_names() |> 
   mutate(
     reported_collection_segregation = reported_collection_segregation |> 

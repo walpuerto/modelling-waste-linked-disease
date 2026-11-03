@@ -77,7 +77,7 @@ model_accuracies |>
 
 RGA measures the "concordance" of the predicted values vector to the observed values vector. A value of 1 indicates that the predictions match exactly to the observations. A value of 0 indicates that the predictions mismatch completely to the observations. A value of 0.5 indicates no correlation among the vectors. And, other values can signify a mixed interpretation.
 
-For instance, the predictions of the gastroenteritis model are likely uncorrelated to the actual observations because it has an RGA score of `r round(model_accuracies$rga[2], 2)`.
+For instance, the predictions of the bronchial asthma model are likely uncorrelated to the actual observations because it has an RGA score of `r round(model_accuracies$rga[2], 2)`.
 
 ## Model Robustness (Stability)
 
