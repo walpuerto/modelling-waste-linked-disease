@@ -134,13 +134,13 @@ server <- function(input, output, session) {
         mutate(
           predictor_name = str_to_title(gsub("_", " ", predictor_name))
         ) |> 
-        ggplot(aes(x = percent_inc_mse, y = predictor_name)) +
+        ggplot(aes(x = m_percent_inc_mse, y = predictor_name)) +
         geom_col() +
         labs(
-          x = "% Increase in MSE",
+          x = "Modified % Increase in MSE",
           y = "Predictor",
           title = paste0(
-            "% Increase in MSE of each predictor in the ",
+            "Modified % Increase in MSE of each predictor in the ",
             input$disease_name,
             " model"
             )
@@ -152,7 +152,7 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-%IncMSE measures the accuracy contribution of a predictor in a model. A positive %IncMSE statistic indicates that the reduced model's predictions deviate more from the observed values than the full model's predictions. Meanwhile, a negative %IncMSE statistic indicates that the reduced model's predictions match more to the observed values than the full model's predictions. A 0 score indicates that the reduced model and full model have the same predictive accuracy.
+Modified %IncMSE measures the accuracy contribution of a predictor in a model. A positive %IncMSE statistic indicates that the reduced model's predictions deviate more from the observed values than the full model's predictions. Meanwhile, a negative %IncMSE statistic indicates that the reduced model's predictions match more to the observed values than the full model's predictions. A 0 score indicates that the reduced model and full model have the same predictive accuracy.
 
 It is important to note that %IncMSE does not measure causality, but the accuracy contribution of a predictor in the model.
 

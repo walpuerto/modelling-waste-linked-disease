@@ -15,7 +15,7 @@ predict_all_reduced_models <- function(disease_name) {
     map(\(x) predict_reduced_model(x, disease_name))
 }
 
-percent_inc_mse <- function(full_prediction, reduced_prediction, observed) {
+m_percent_inc_mse <- function(full_prediction, reduced_prediction, observed) {
   full_mse <- mse(full_prediction, observed)
   
   reduced_mse <- mse(reduced_prediction, observed)
@@ -39,7 +39,9 @@ evaluate_explainability <- function(disease_name, statistic) {
 generate_explainability_tibble <- function(disease_name) {
   tibble(
     predictor_name = names(select(predictors, -name_of_place)),
-    percent_inc_mse = evaluate_explainability(disease_name, percent_inc_mse),
+    m_percent_inc_mse = evaluate_explainability(
+      disease_name, m_percent_inc_mse
+      ),
     rge = evaluate_explainability(disease_name, rge)
   )
 }
