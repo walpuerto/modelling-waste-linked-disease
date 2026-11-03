@@ -97,13 +97,20 @@ model_robustness <- read_csv("Results/model_robustness.csv") |>
   )
 
 model_robustness |> 
-  ggplot(aes(x = model_name, y = rmse)) +
-  geom_col() +
-  coord_flip() +
-  labs(
-    x = "Disease Model",
-    y = "RMSE",
-    title = "RMSE between full and perturbed predictions")
+  mutate(model_name = fct_reorder(model_name, rmse)) |> 
+  ggplot(aes(x = rmse, y = model_name)) +
+  geom_segment(
+    aes(x = 0, xend = rmse, y = model_name, yend = model_name),
+    color = "grey"
+    ) +
+  geom_point(color = "orange", size = 4) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank()
+  ) +
+  labs(x = "RMSE", y = "Disease Model")
 ```
 
 RMSE measures the average distance of the predictions made with perturbed data to the predictions made with complete data. It is in the units of number of cases. A high RMSE score indicates poor robustness against perturbations in the data, while a low RMSE score indicates better robustness. 
@@ -112,13 +119,20 @@ For instance, the bronchial asthma model is likely unstable because the perturbe
 
 ```{r robustness_rgr}
 model_robustness |> 
+  mutate(model_name = fct_reorder(model_name, rgr)) |> 
   ggplot(aes(x = rgr, y = model_name)) +
-  geom_col() +
-  labs(
-    x = "Disease Model",
-    y = "RGR",
-    title = "RGR of disease models"
-    ) + 
+  geom_segment(
+    aes(x = 0.5, xend = rgr, y = model_name, yend = model_name),
+    color = "grey"
+    ) +
+  geom_point(color = "orange", size = 4) +
+  theme_light() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank()
+  ) +
+  labs(x = "Disease Model", y = "RGR") + 
   scale_x_continuous(limits = c(0, 1))
 ```
 
