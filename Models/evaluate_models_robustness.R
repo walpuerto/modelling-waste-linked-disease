@@ -40,8 +40,8 @@ predict_perturbed <- function(disease_name) {
     predict(testing_x)
 }
 
-rgr <- function(full_prediction, perturbed_prediction) {
-  rg(full_prediction, perturbed_prediction) 
+rgr <- function(full_prediction, perturbed_prediction, plot = FALSE) {
+  rg(full_prediction, perturbed_prediction, plot) 
 }
 
 evaluate_robustness <- function(disease_name, statistic, ...) {
