@@ -168,17 +168,26 @@ server <- function(input, output, session) {
         mutate(
           predictor_name = str_to_title(gsub("_", " ", predictor_name))
         ) |> 
+        mutate(
+          predictor_name = fct_reorder(predictor_name, m_percent_inc_mse)
+          ) |> 
         ggplot(aes(x = m_percent_inc_mse, y = predictor_name)) +
-        geom_col() +
-        labs(
-          x = "Modified % Increase in MSE",
-          y = "Predictor",
-          title = paste0(
-            "Modified % Increase in MSE of each predictor in the ",
-            input$disease_name,
-            " model"
-            )
-        )
+        geom_segment(
+          aes(
+            x = 0,
+            xend = m_percent_inc_mse,
+            y = predictor_name,
+            yend = predictor_name),
+          color = "grey"
+          ) +
+        geom_point(color = "orange", size = 4) +
+        theme_light() +
+        theme(
+          panel.grid.major.y = element_blank(),
+          panel.border = element_blank(),
+          axis.ticks.y = element_blank()
+        ) +
+        labs(x = "Modified % Increase in MSE", y = "Predictor")
     }
   )
 }
@@ -208,17 +217,26 @@ server <- function(input, output, session) {
         mutate(
           predictor_name = str_to_title(gsub("_", " ", predictor_name))
         ) |> 
+        mutate(
+          predictor_name = fct_reorder(predictor_name, rge)
+          ) |> 
         ggplot(aes(x = rge, y = predictor_name)) +
-        geom_col() +
-        labs(
-          x = "RGE",
-          y = "Predictor",
-          title = paste0(
-            "% Increase in MSE of each predictor in the ",
-            input$disease_name,
-            " model"
-            )
+        geom_segment(
+          aes(
+            x = 0.5,
+            xend = rge,
+            y = predictor_name,
+            yend = predictor_name),
+          color = "grey"
+          ) +
+        geom_point(color = "orange", size = 4) +
+        theme_light() +
+        theme(
+          panel.grid.major.y = element_blank(),
+          panel.border = element_blank(),
+          axis.ticks.y = element_blank()
         ) +
+        labs(x = "RGE", y = "Predictor") +
         scale_x_continuous(limits = c(0, 1))
     }
   )
