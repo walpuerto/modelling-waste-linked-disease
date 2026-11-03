@@ -1,9 +1,9 @@
-convert_some_to_all <- function(factor) {
+convert_some_to_all <- function(string) {
   ifelse(
-    factor == "SOME AREAS",
+    string == "SOME AREAS",
     "ALL AREAS",
     ifelse(
-      factor == "ALL AREAS",
+      string == "ALL AREAS",
       "ALL AREAS",
       "NONE" 
       )
