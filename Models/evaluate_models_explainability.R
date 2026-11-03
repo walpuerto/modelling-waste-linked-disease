@@ -4,7 +4,7 @@ predict_reduced_model <- function(predictor_name, disease_name) {
   
   paste0("Models/Reduced Models/", disease_name, "_reduced_models.rds") |>
     readRDS() |>
-    pull(predictor_name) |> 
+    _[[predictor_name]] |> 
     predict(testing_x)
 }
 
@@ -23,7 +23,7 @@ percent_inc_mse <- function(full_prediction, reduced_prediction, observed) {
   (reduced_mse - full_mse) * 100 / full_mse
 }
 
-rge <- function(full_prediction, reduced_prediction, observed) {
+rge <- function(full_prediction, reduced_prediction, ...) {
   rg(reduced_prediction, full_prediction)
 }
 
