@@ -50,4 +50,4 @@ model_explainabilities <- disease_names |>
 names(model_explainabilities) <- disease_names
   
 model_explainabilities |> 
-  write_rds(file = "results/model_explainabilities.rds")
+  write_rds(file = "Results/model_explainabilities.rds")
