@@ -49,8 +49,6 @@ evaluate_robustness <- function(disease_name, statistic, ...) {
   
   perturbed_prediction <- predict_perturbed(disease_name)
   
-  observed <- get_testing_y(disease_name)
-  
   statistic(full_prediction, perturbed_prediction, ...)
 }
 
