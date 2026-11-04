@@ -149,7 +149,8 @@ model_explainabilities <- read_rds("Results/model_explainabilities.rds")
 
 names(model_explainabilities) <- model_explainabilities |> 
   names() |> 
-  map_chr(\(x) str_to_title(gsub("_", " ", x)))
+  map_chr(\(x) str_to_title(gsub("_", " ", x))) |> 
+  str_sort()
 
 ui <- fluidPage(
   selectInput(
