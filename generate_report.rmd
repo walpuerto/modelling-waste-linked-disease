@@ -136,7 +136,7 @@ model_robustness |>
     axis.ticks.y = element_blank(),
     text = element_text(size = 15)
   ) +
-  labs(x = "Disease Model", y = "RGR") + 
+  labs(x = "RGR", y = "Disease Model") + 
   scale_x_continuous(limits = c(0, 1))
 ```
 
