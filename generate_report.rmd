@@ -26,56 +26,87 @@ Model accuracy was obtained using untouched testing sets. Each model had its own
 
 ```{r accuracy_rmse, echo=FALSE}
 library(tidyverse)
+library(shiny)
+library(rlang)
 
 model_accuracies <- read_csv("Results/model_accuracies.csv") |> 
   mutate(
-    model_name = gsub("_", " ", model_name) |> 
-      str_to_title()
+    model_name = str_to_title(gsub("_", " ", model_name))
   )
 
-model_accuracies |> 
-  mutate(model_name = fct_reorder(model_name, rmse))|> 
-  ggplot(aes(x = rmse, y = model_name)) +
-  geom_segment(
-    aes(x = 0, xend = rmse, y = model_name, yend = model_name),
-    color = "grey"
-    ) +
-  geom_point(color = "orange", size = 4) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    text = element_text(size = 15)
-  ) +
-  labs(
-    x = "RMSE",
-    y = "Disease Model")
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      selectInput(
+        inputId = "statistic",
+        label = "Statistic",
+        choices = list("RMSE" = "rmse", "RGA" = "rga")
+      )
+    ),
+    mainPanel(
+      tabsetPanel(
+        tabPanel(
+          title = "Lolipop Plot",
+          plotOutput("lolipop_plot")
+        ),
+        tabPanel(
+          title = "Data Table",
+          tableOutput("data_table")
+        ),
+      )
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  output$lolipop_plot <- renderPlot({
+    statistic <- data_sym(input$statistic)
+    
+    plot <- model_accuracies |> 
+      mutate(
+        model_name = fct_reorder(model_name, !!statistic)
+      ) |> 
+      ggplot(aes(x = !!statistic, y = model_name)) +
+      geom_segment(
+        aes(
+          x = ifelse(input$statistic == "rmse", 0, 0.5),
+          xend = !!statistic,
+          y = model_name,
+          yend = model_name
+        ),
+        color = "grey"
+        ) +
+      geom_point(color = "orange", size = 4) +
+      theme_light() +
+      theme(
+        panel.grid.major.y = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.y = element_blank(),
+        text = element_text(size = 15)
+      ) +
+      labs(
+        x = ifelse(input$statistic == "rmse", "RMSE", "RGA"),
+        y = "Disease Model"
+      )
+    
+    if (input$statistic == "rga") {
+      plot + scale_x_continuous(limits = c(0, 1))
+    } else {
+      plot
+    }
+  })
+  
+  output$data_table <- renderTable({
+    model_accuracies |> 
+      select(model_name, any_of(input$statistic))
+  }, striped = TRUE)
+}
+
+shinyApp(ui, server)
+
 ```
 
 RMSE gives a general idea of how "distant" the predicted values are from the observed values. It is in the same units as the predicted variable, which in this case is incidence of disease or number of cases. For instance, on average, dengue predictions differ by about `r round(model_accuracies$rmse[1], 2)` cases from the observed values. 
-
-```{r accuracy_rge}
-model_accuracies |> 
-  mutate(model_name = fct_reorder(model_name, rga)) |> 
-  ggplot(aes(x = rga, y = model_name)) +
-  geom_segment(
-    aes(x = 0.5, xend = rga, y = model_name, yend = model_name),
-    color = "grey"
-    ) +
-  geom_point(color = "orange", size = 4) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    text = element_text(size = 15)
-  ) +
-  labs(
-    x = "RGA",
-    y = "Disease Model") + 
-  scale_x_continuous(limits = c(0, 1))
-```
 
 RGA measures the "concordance" of the predicted values vector to the observed values vector. A value of 1 indicates that the predictions match exactly to the observations. A value of 0 indicates that the predictions mismatch completely to the observations. A value of 0.5 indicates no correlation among the vectors. And, other values can signify a mixed interpretation.
 
@@ -147,9 +178,6 @@ RGR measures the concordance between the prediction vector made with perturbed d
 Reduced versions of each random forest model were made, wherein a specific predictor was removed during the training process. The reduced models' predictions were compared against the full model's using Percent Increase in Mean-Square Error (%IncMSE) and Rank Graduation Explainability (RGE). 
 
 ```{r explainability_percent_inc_mse}
-library(shiny)
-library(rlang)
-
 model_explainabilities <- read_rds("Results/model_explainabilities.rds")
 
 names(model_explainabilities) <- model_explainabilities |> 
