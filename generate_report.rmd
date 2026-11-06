@@ -103,31 +103,6 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
-<<<<<<< HEAD
-
-=======
-# 
-# 
-# 
-# model_accuracies |> 
-#   mutate(model_name = fct_reorder(model_name, rmse))|> 
-#   ggplot(aes(x = rmse, y = model_name)) +
-#   geom_segment(
-#     aes(x = 0, xend = rmse, y = model_name, yend = model_name),
-#     color = "grey"
-#     ) +
-#   geom_point(color = "orange", size = 4) +
-#   theme_light() +
-#   theme(
-#     panel.grid.major.y = element_blank(),
-#     panel.border = element_blank(),
-#     axis.ticks.y = element_blank(),
-#     text = element_text(size = 15)
-#   ) +
-#   labs(
-#     x = "RMSE",
-#     y = "Disease Model")
->>>>>>> 5ca409bcce5854e1ca25042e95bd46caad9197c8
 ```
 
 RMSE gives a general idea of how "distant" the predicted values are from the observed values. It is in the same units as the predicted variable, which in this case is incidence of disease or number of cases. For instance, on average, dengue predictions differ by about `r round(model_accuracies$rmse[1], 2)` cases from the observed values. 
