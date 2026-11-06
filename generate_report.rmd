@@ -148,6 +148,7 @@ Reduced versions of each random forest model were made, wherein a specific predi
 
 ```{r explainability_percent_inc_mse}
 library(shiny)
+library(rlang)
 
 model_explainabilities <- read_rds("Results/model_explainabilities.rds")
 
@@ -157,45 +158,87 @@ names(model_explainabilities) <- model_explainabilities |>
   str_sort()
 
 ui <- fluidPage(
-  selectInput(
-    inputId = "disease_name",
-    label = "Select model",
-    choices = names(model_explainabilities)
-  ),
-  hr(),
-  plotOutput("plot")
+  sidebarLayout(
+    sidebarPanel(
+      selectInput(
+        inputId = "disease_name",
+        label = "Disease Model",
+        choices = names(model_explainabilities)
+      ),
+      selectInput(
+        inputId = "statistic",
+        label = "Statistic", #or metric
+        choices = list(
+          "Modified %IncMSE" = "m_percent_inc_mse",
+          "RGE" = "rge"
+        )
+      ),
+    ),
+    mainPanel(tabsetPanel(
+      tabPanel("Lolipop Plot",
+               plotOutput("lolipop_plot")),
+      tabPanel("Data Table",
+               tableOutput("data_table")),
+    ))
+  )
 )
 
 server <- function(input, output, session) {
-  output$plot <- renderPlot(
-    {
-      model_explainabilities[[input$disease_name]] |> 
-        mutate(
-          predictor_name = str_to_title(gsub("_", " ", predictor_name))
+  model_data <- reactive({
+    model_explainabilities[[input$disease_name]] |> 
+      mutate(
+        predictor_name = str_to_title(gsub("_", " ", predictor_name))
         ) |> 
-        mutate(
-          predictor_name = fct_reorder(predictor_name, m_percent_inc_mse)
-          ) |> 
-        ggplot(aes(x = m_percent_inc_mse, y = predictor_name)) +
-        geom_segment(
-          aes(
-            x = 0,
-            xend = m_percent_inc_mse,
-            y = predictor_name,
-            yend = predictor_name),
-          color = "grey"
-          ) +
-        geom_point(color = "orange", size = 4) +
-        theme_light() +
-        theme(
-          panel.grid.major.y = element_blank(),
-          panel.border = element_blank(),
-          axis.ticks.y = element_blank(),
-          text = element_text(size = 20)
-        ) +
-        labs(x = "Modified % Increase in MSE", y = "Predictor")
+      mutate(
+        predictor_name = fct_reorder(predictor_name, m_percent_inc_mse)
+        )
+  })
+  
+  output$lolipop_plot <- renderPlot({
+    statistic <- data_sym(input$statistic)
+    
+    plot <- model_data() |> 
+      ggplot(aes(x = !!statistic, y = predictor_name)) +
+      geom_segment(
+        aes(
+          x = ifelse(
+            input$statistic == "m_percent_inc_mse",
+            0,
+            0.5
+            ),
+          xend = !!statistic,
+          y = predictor_name,
+          yend = predictor_name),
+        color = "grey"
+      ) +
+      geom_point(color = "orange", size = 4) +
+      theme_light() +
+      theme(
+        panel.grid.major.y = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.y = element_blank(),
+        text = element_text(size = 20)
+      ) +
+      labs(
+        x = ifelse(
+          input$statistic == "m_percent_inc_mse",
+          "Modified %IncMSE",
+          "RGE"
+          ),
+        y = "Predictor"
+      )
+    
+    if (input$statistic == "rge") {
+      plot + scale_x_continuous(limits = c(0, 1))
+    } else {
+      plot
     }
-  )
+  })
+  
+  output$data_table <- renderTable({
+    model_data() |> 
+      select(predictor_name, any_of(input$statistic))
+  }, striped = TRUE)
 }
 
 shinyApp(ui, server)
@@ -204,53 +247,6 @@ shinyApp(ui, server)
 Modified %IncMSE measures the accuracy contribution of a predictor in a model. A positive %IncMSE statistic indicates that the reduced model's predictions deviate more from the observed values than the full model's predictions. Meanwhile, a negative %IncMSE statistic indicates that the reduced model's predictions match more to the observed values than the full model's predictions. A 0 score indicates that the reduced model and full model have the same predictive accuracy.
 
 It is important to note that %IncMSE does not measure causality, but the accuracy contribution of a predictor in the model.
-
-```{r explainability_rge}
-ui <- fluidPage(
-  selectInput(
-    inputId = "disease_name",
-    label = "Select model",
-    choices = names(model_explainabilities)
-  ),
-  hr(),
-  plotOutput("plot")
-)
-
-server <- function(input, output, session) {
-  output$plot <- renderPlot(
-    {
-      model_explainabilities[[input$disease_name]] |> 
-        mutate(
-          predictor_name = str_to_title(gsub("_", " ", predictor_name))
-        ) |> 
-        mutate(
-          predictor_name = fct_reorder(predictor_name, rge)
-          ) |> 
-        ggplot(aes(x = rge, y = predictor_name)) +
-        geom_segment(
-          aes(
-            x = 0.5,
-            xend = rge,
-            y = predictor_name,
-            yend = predictor_name),
-          color = "grey"
-          ) +
-        geom_point(color = "orange", size = 4) +
-        theme_light() +
-        theme(
-          panel.grid.major.y = element_blank(),
-          panel.border = element_blank(),
-          axis.ticks.y = element_blank(),
-          text = element_text(size = 20)
-        ) +
-        labs(x = "RGE", y = "Predictor") +
-        scale_x_continuous(limits = c(0, 1))
-    }
-  )
-}
-
-shinyApp(ui, server)
-```
 
 RGE measures the concordance between the reduced model's prediction vector and the full model's prediction vector. An RGE score of 1 indicates that the full predictions match exactly with the reduced predictions. An RGE score of 0 indicates that the predictions are mismatched completely. An RGE score 0.5 indicates no correlation. And, other scores indicate a mix in between.
 
