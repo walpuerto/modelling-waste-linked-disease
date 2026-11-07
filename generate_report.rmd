@@ -136,47 +136,89 @@ model_robustness <- read_csv("Results/model_robustness.csv") |>
       str_to_title()
   )
 
-model_robustness |> 
-  mutate(model_name = fct_reorder(model_name, rmse)) |> 
-  ggplot(aes(x = rmse, y = model_name)) +
-  geom_segment(
-    aes(x = 0, xend = rmse, y = model_name, yend = model_name),
-    color = "grey"
-    ) +
-  geom_point(color = "orange", size = 4) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    text = element_text(size = 15)
-  ) +
-  labs(x = "RMSE", y = "Disease Model")
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      selectInput(
+        inputId = "statistic",
+        label = "Statistic",
+        choices = list("RMSE" = "rmse", "RGR" = "rgr")
+      )
+    ),
+    mainPanel(
+      tabsetPanel(
+        tabPanel(
+          title = "Lolipop Plot",
+          plotOutput("lolipop_plot")
+        ),
+        tabPanel(
+          title = "Data Table",
+          tableOutput("data_table")
+        ),
+      )
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  reactive_data <- reactive({
+    statistic <- data_sym(input$statistic)
+    
+    model_robustness |> 
+      mutate(
+        model_name = fct_reorder(model_name, !!statistic)
+      )
+  })
+  
+  reactive_statistic <- reactive({
+    data_sym(input$statistic)
+  })
+  
+  output$lolipop_plot <- renderPlot({
+    plot <- reactive_data() |> 
+      ggplot(aes(x = !!(reactive_statistic()), y = model_name)) +
+      geom_segment(
+        aes(
+          x = ifelse(input$statistic == "rmse", 0, 0.5),
+          xend = !!(reactive_statistic()),
+          y = model_name,
+          yend = model_name
+        ),
+        color = "grey"
+        ) +
+      geom_point(color = "orange", size = 4) +
+      theme_light() +
+      theme(
+        panel.grid.major.y = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.y = element_blank(),
+        text = element_text(size = 15)
+      ) +
+      labs(
+        x = ifelse(input$statistic == "rmse", "RMSE", "RGR"),
+        y = "Disease Model"
+      )
+    
+    if (input$statistic == "rgr") {
+      plot + scale_x_continuous(limits = c(0, 1))
+    } else {
+      plot
+    }
+  })
+  
+  output$data_table <- renderTable({
+    reactive_data() |> 
+      select(model_name, any_of(input$statistic))
+  }, striped = TRUE)
+}
+
+shinyApp(ui, server)
+
 ```
 
 RMSE measures the average distance of the predictions made with perturbed data to the predictions made with complete data. It is in the units of number of cases. A high RMSE score indicates poor robustness against perturbations in the data, while a low RMSE score indicates better robustness. 
 
 For instance, the bronchial asthma model is likely unstable because the perturbed predictions differ by about `r round(model_robustness$rmse[1], 2)` cases to the full predictions.
-
-```{r robustness_rgr}
-model_robustness |> 
-  mutate(model_name = fct_reorder(model_name, rgr)) |> 
-  ggplot(aes(x = rgr, y = model_name)) +
-  geom_segment(
-    aes(x = 0.5, xend = rgr, y = model_name, yend = model_name),
-    color = "grey"
-    ) +
-  geom_point(color = "orange", size = 4) +
-  theme_light() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank(),
-    text = element_text(size = 15)
-  ) +
-  labs(x = "RGR", y = "Disease Model") + 
-  scale_x_continuous(limits = c(0, 1))
-```
 
 RGR measures the concordance between the prediction vector made with perturbed data and the prediction vector made with full data. A value of 1 indicates that the perturbed predictions match exactly to the full predictions. A value of 0 indicates that the perturbed predictions mismatch completely to the full predictions. A value of 0.5 indicates no correlation. And, other values signify a mixed interpretation.
 
