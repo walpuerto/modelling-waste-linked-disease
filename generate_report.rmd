@@ -262,19 +262,19 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   model_data <- reactive({
-    model_explainabilities[[input$disease_name]] |> 
-      mutate(
-        predictor_name = str_to_title(gsub("_", " ", predictor_name))
-        ) |> 
-      mutate(
-        predictor_name = fct_reorder(predictor_name, m_percent_inc_mse)
-        )
+    model_explainabilities[[input$disease_name]]
   })
   
   output$lolipop_plot <- renderPlot({
     statistic <- data_sym(input$statistic)
     
     plot <- model_data() |> 
+      mutate(
+        predictor_name = str_to_title(gsub("_", " ", predictor_name))
+        ) |> 
+      mutate(
+        predictor_name = fct_reorder(predictor_name, !!statistic)
+        ) |> 
       ggplot(aes(x = !!statistic, y = predictor_name)) +
       geom_segment(
         aes(
