@@ -161,26 +161,18 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  reactive_data <- reactive({
+  output$lolipop_plot <- renderPlot({
     statistic <- data_sym(input$statistic)
     
-    model_robustness |> 
+    plot <- model_robustness |> 
       mutate(
         model_name = fct_reorder(model_name, !!statistic)
-      )
-  })
-  
-  reactive_statistic <- reactive({
-    data_sym(input$statistic)
-  })
-  
-  output$lolipop_plot <- renderPlot({
-    plot <- reactive_data() |> 
-      ggplot(aes(x = !!(reactive_statistic()), y = model_name)) +
+      ) |> 
+      ggplot(aes(x = !!statistic, y = model_name)) +
       geom_segment(
         aes(
           x = ifelse(input$statistic == "rmse", 0, 0.5),
-          xend = !!(reactive_statistic()),
+          xend = !!statistic,
           y = model_name,
           yend = model_name
         ),
@@ -207,7 +199,7 @@ server <- function(input, output, session) {
   })
   
   output$data_table <- renderTable({
-    reactive_data() |> 
+    model_robustness |> 
       select(model_name, any_of(input$statistic))
   }, striped = TRUE)
 }
