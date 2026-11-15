@@ -27,6 +27,7 @@ Model accuracy was obtained using untouched testing sets. Each model had its own
 ```{r accuracy_rmse, echo=FALSE}
 library(tidyverse)
 library(shiny)
+library(shinythemes)
 library(rlang)
 
 model_accuracies <- read_csv("Results/model_accuracies.csv") |> 
@@ -35,6 +36,7 @@ model_accuracies <- read_csv("Results/model_accuracies.csv") |>
   )
 
 ui <- fluidPage(
+  theme = shinytheme("spacelab"),
   sidebarLayout(
     sidebarPanel(
       selectInput(
@@ -129,6 +131,7 @@ model_robustness <- read_csv("Results/model_robustness.csv") |>
   )
 
 ui <- fluidPage(
+  theme = shinytheme("spacelab"),
   sidebarLayout(
     sidebarPanel(
       selectInput(
@@ -219,6 +222,7 @@ names(model_explainabilities) <- model_explainabilities |>
   str_sort()
 
 ui <- fluidPage(
+  theme = shinytheme("spacelab"),
   sidebarLayout(
     sidebarPanel(
       selectInput(
